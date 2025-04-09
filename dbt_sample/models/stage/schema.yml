@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: stg_neighborhoods
+    description: "Raw neighborhoods table"
+    columns:
+      - name: the_geom
+      - name: BoroCode
+      - name: BoroName
+      - name: CountyFIPS
+      - name: NTA2020
+      - name: NTAName
+      - name: NTAAbbrev
+      - name: NTAType
+      - name: CDTA2020
+      - name: CDTAName
+      - name: Shape_Leng
+      - name: Shape_Area
