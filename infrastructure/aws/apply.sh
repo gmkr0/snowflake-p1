@@ -14,4 +14,5 @@ terraform apply \
   -var "aws_access_key=$AWS_ACCESS_KEY" \
   -var "aws_secret_token=$AWS_SECRET_TOKEN" \
   -var "snowflake_user_arn=$SNOWFLAKE_IAM_USER_ARN" \
-  -var "snowflake_external_id=$SNOWFLAKE_AWS_EXTERNAL_ID"
+  -var "snowflake_external_id=$SNOWFLAKE_AWS_EXTERNAL_ID" \
+  -var "snowflake_queue_arn=$SNOWFLAKE_QUEUE_ARN"

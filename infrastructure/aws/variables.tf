@@ -26,4 +26,9 @@ variable "snowflake_external_id" {
   description = "The external ID of the Snowflake user"
 }
 
+variable "snowflake_queue_arn" {
+  type        = string
+  description = "The ARN of the Snowflake queue"
+}
+
 

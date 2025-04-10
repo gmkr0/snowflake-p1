@@ -85,6 +85,10 @@ resource "aws_s3_object" "snowflake_folder" {
 resource "aws_iam_role_policy" "snowflake-reader-policy" {
   name = "snowflake-reader-policy"
   role = aws_iam_role.snowflake-reader.name
+  depends_on = [
+    aws_s3_object.snowflake_folder,
+    aws_s3_bucket.gmkr_test_bucket
+  ]
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -94,7 +98,7 @@ resource "aws_iam_role_policy" "snowflake-reader-policy" {
           "s3:GetObjectVersion"
         ]
         Effect   = "Allow"
-        Resource = "arn:aws:s3:::gmkr-test-bucket/sample_data/*"
+        Resource = "${aws_s3_bucket.gmkr_test_bucket.arn}/${aws_s3_object.snowflake_folder.key}*"
       },
       {
         Effect = "Allow",
@@ -102,15 +106,26 @@ resource "aws_iam_role_policy" "snowflake-reader-policy" {
           "s3:ListBucket",
           "s3:GetBucketLocation"
         ]
-        Resource = "arn:aws:s3:::gmkr-test-bucket"
+        Resource = "${aws_s3_bucket.gmkr_test_bucket.arn}"
         Condition = {
           StringLike = {
-            "s3:prefix" = ["sample_data/*"]
+            "s3:prefix" = ["${aws_s3_object.snowflake_folder.key}*"]
           }
         }
       }
     ]
   })
+}
+
+resource "aws_s3_bucket_notification" "gmkr_test_bucket_notification" {
+  bucket = aws_s3_bucket.gmkr_test_bucket.id
+
+  queue {
+    queue_arn     = var.snowflake_queue_arn
+    events        = ["s3:ObjectCreated:*"]
+    filter_prefix = "${aws_s3_object.snowflake_folder.key}"
+    filter_suffix = ".csv"
+  }
 }
 
 output "snowflake-reader-role-arn" {

@@ -39,7 +39,13 @@ resource "snowflake_file_format" "s3_file_format" {
   database    = snowflake_database.primary.name
   schema      = snowflake_schema.raw.name
   format_type = "CSV"
+  parse_header = true
+  record_delimiter = "\n"
+  field_delimiter = ","
+  trim_space = true
 }
+
+
 
 resource "snowflake_stage" "s3_stage3" {
   name                = "S3_STAGE"
