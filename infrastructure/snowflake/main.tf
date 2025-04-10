@@ -7,13 +7,12 @@ terraform {
   }
 }
 
-locals {
 provider "snowflake" {
   organization_name = "rtnhgqg"
   account_name      = "no03980"
   user              = "tf-snow"
   authenticator     = "SNOWFLAKE_JWT"
-  private_key       = file("C:\\Users\\egood\\.ssh\\snowflake_tf_snow_key.p8")
+  private_key       = var.snowflake_private_key
   role              = "ACCOUNTADMIN"
 }
 

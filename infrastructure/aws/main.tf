@@ -1,8 +1,3 @@
-locals {
-  snowflake_user_arn    = "arn:aws:iam::831926600710:user/a9my0000-s"
-  snowflake_external_id = "ZN18147_SFCRole=3_Ej1e54lxs5SHgsBcj0819DcV+Ss="
-}
-
 terraform {
   required_providers {
     aws = {
@@ -18,6 +13,42 @@ provider "aws" {
   secret_key = var.aws_secret_token
 }
 
+resource "aws_s3_bucket" "gmkr_test_bucket" {
+  bucket = "gmkr-test-bucket"
+  object_lock_enabled = true
+}
+
+resource "aws_s3_bucket_versioning" "gmkr_test_bucket_versioning" {
+  bucket = aws_s3_bucket.gmkr_test_bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_ownership_controls" "gmkr_test_bucket_ownership_controls" {
+  bucket = aws_s3_bucket.gmkr_test_bucket.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "gmkr_test_bucket_public_access_block" {
+  bucket = aws_s3_bucket.gmkr_test_bucket.id
+  block_public_acls       = false 
+  block_public_policy     = true
+  ignore_public_acls      = false
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_acl" "gmkr_test_bucket_acl" {
+  depends_on = [
+    aws_s3_bucket_public_access_block.gmkr_test_bucket_public_access_block,
+    aws_s3_bucket_ownership_controls.gmkr_test_bucket_ownership_controls
+  ]
+  bucket = aws_s3_bucket.gmkr_test_bucket.id
+  acl    = "public-read"
+}
+
 resource "aws_iam_role" "snowflake-reader" {
   name = "snowflake-reader-auto"
 
@@ -28,17 +59,27 @@ resource "aws_iam_role" "snowflake-reader" {
         Sid    = "",
         Effect = "Allow",
         Principal = {
-          "AWS" : local.snowflake_user_arn
+          "AWS" : var.snowflake_user_arn
         },
         Action = "sts:AssumeRole",
         Condition = {
           StringEquals = {
-            "sts:ExternalId" = local.snowflake_external_id
+            "sts:ExternalId" = var.snowflake_external_id
           }
         }
       }
     ]
   })
+}
+
+resource "aws_s3_object" "snowflake_folder" {
+  depends_on = [
+    aws_s3_bucket_acl.gmkr_test_bucket_acl
+  ]
+  bucket = aws_s3_bucket.gmkr_test_bucket.id
+  key    = "snowflake/"
+  acl    = "public-read"
+  content = ""
 }
 
 resource "aws_iam_role_policy" "snowflake-reader-policy" {
@@ -75,3 +116,8 @@ resource "aws_iam_role_policy" "snowflake-reader-policy" {
 output "snowflake-reader-role-arn" {
   value = aws_iam_role.snowflake-reader.arn
 }
+
+output "gmkr_test_bucket_s3_url" {
+  value = "s3://${aws_s3_bucket.gmkr_test_bucket.bucket}/${aws_s3_object.snowflake_folder.key}"
+}
+

@@ -16,5 +16,14 @@ variable "aws_secret_token" {
   sensitive   = true
 }
 
+variable "snowflake_user_arn" {
+  type        = string
+  description = "The ARN of the Snowflake user"
+}
+
+variable "snowflake_external_id" {
+  type        = string
+  description = "The external ID of the Snowflake user"
+}
 
 

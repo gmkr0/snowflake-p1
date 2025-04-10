@@ -3,5 +3,4 @@ config/.env
 snowflake/output/
 logs
 *.terraform*
-*.tfstate
 *.tfstate.*
