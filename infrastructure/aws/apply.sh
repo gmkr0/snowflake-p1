@@ -5,7 +5,8 @@ project_root=$(dirname -- "$dir")/../..
 
 # Load environment variables from .env file
 set -a
-source "$project_root/config/.env"
+source "$project_root/config/.env.dev"
+source "$project_root/config/.env.secret"
 set +a
 
 # Run terraform apply with the loaded environment variables

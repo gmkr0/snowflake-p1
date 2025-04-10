@@ -1,5 +1,5 @@
 .venv
-config/.env
+config/.env.secret
 snowflake/output/
 logs
 *.terraform*
